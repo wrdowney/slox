@@ -46,11 +46,6 @@ final class Scanner {
                 while peek != "\n" && !isAtEnd {
                     advance()
                 }
-            } else if match("*") {
-                while peek != "*" && peekNext != "/" && !isAtEnd {
-                    advance()
-                    advance()
-                }
             } else {
                 addToken(.SLASH)
             }

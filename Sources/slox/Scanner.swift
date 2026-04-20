@@ -41,13 +41,18 @@ final class Scanner {
         case ">": addToken(match("=") ? .GREATER_EQUAL : .GREATER)
         case "/":
             // Check for comments
-            guard !match("/") else {
+            if match("/")  {
+                // Ignore the rest of the line if it is a comment
+                while peek != "\n" && !isAtEnd {
+                    advance()
+                }
+            } else if match("*") {
+                while peek != "*" && peekNext != "/" && !isAtEnd {
+                    advance()
+                    advance()
+                }
+            } else {
                 addToken(.SLASH)
-                break
-            }
-            // Ignore the rest of the line if it is a comment
-            while peek != "\n" && !isAtEnd {
-                _ = advance()
             }
         case " ", "\r", "\t": break
         case "\n": line += 1
@@ -68,7 +73,7 @@ final class Scanner {
         }
     }
     
-    private func advance() -> Character {
+    @discardableResult private func advance() -> Character {
         if isAtEnd {
             return "\0" // unicode NUL character
         }
@@ -125,7 +130,7 @@ final class Scanner {
         // Advance until the string is terminated
         while peek != "\"" && !isAtEnd {
             if peek == "\n" { line += 1 } // Lox allows multi-line strings
-            _ = advance()
+            advance()
         }
         
         guard !isAtEnd else {
@@ -133,7 +138,7 @@ final class Scanner {
             return
         }
         
-        _ = advance()
+        advance()
         // Capture the string
         let end: String.Index = source.index(source.startIndex, offsetBy: current - 1)
         let value: String = String(source[startIndex..<end])
@@ -141,11 +146,11 @@ final class Scanner {
     }
     
     private func number() {
-        while peek.isNumber { _ = advance() }
+        while peek.isNumber { advance() }
         
         if peek == "." && peekNext.isNumber {
-            _ = advance()
-            while peek.isNumber { _ = advance() }
+            advance()
+            while peek.isNumber { advance() }
         }
         
         guard let number = Double(source[startIndex..<currentIndex]) else { return }
@@ -154,7 +159,7 @@ final class Scanner {
     
     private func identifier() {
         // Check if id is keyword
-        while peek.isLetter { _ = advance() }
+        while peek.isLetter { advance() }
         let text: String = String(source[startIndex..<currentIndex])
         let type: TokenType = keywords[text] ?? .IDENTIFIER
         addToken(type)

@@ -1,0 +1,11 @@
+var hello = "123" //this is a comment
+var test = 123
+
+fun myFunc() {
+    return 123
+}
+
+/*
+this is a cool function
+by me, will
+*/
